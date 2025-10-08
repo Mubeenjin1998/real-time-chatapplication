@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  app:
+    build: . 
+    container_name: real-time-chat-app
+    ports:
+      - "3000:3000" 
+    volumes:
+      - .:/usr/src/app # Mounts the project directory for live code changes in development
+      - /usr/src/app/node_modules # Excludes node_modules from being overwritten by the host
+    env_file:
+      - .env # Loads environment variables from the .env file
+    depends_on:
+      - redis # Ensures Redis is started before the app
+      - mongo # Ensures MongoDB is started before the app
+    restart: unless-stopped
+
+  # Redis Service
+  redis:
+    image: redis:7-alpine # Uses the official Redis image from Docker Hub
+    container_name: redis-cache
+    ports:
+      - "6379:6379" # Maps the default Redis port
+    volumes:
+      - redis-data:/data # Persists Redis data
+    restart: always
+
+  # MongoDB Service
+  mongo:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db # Persists MongoDB data
+    restart: always
+
+volumes:
+  redis-data:
+  mongo-data:
